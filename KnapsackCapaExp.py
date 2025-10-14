@@ -9,7 +9,6 @@ from OptProblems.knapsack.kpdataset import knapsack_dataset
 from OptProblems.knapsack.kpsolver import knapsack_solver
 from src.pfl import PFL
 from src.odece import ODECE
-from src.cachedodece import ODECE_Caching
 from src.sfl import SFL
 from src.comboptnet import CombOptNet
 from src.TwoStage import TwoStage
@@ -33,12 +32,6 @@ parser.add_argument("--batch_size", type=int, help="batch size", default= 32, re
 parser.add_argument("--max_epochs", type=int, help="max epochs", default= 20, required= False)
 parser.add_argument("--lr", type=float, help="Learning rate", default= 5e-3, required= False)
 ### ODECE Ablation
-parser.add_argument("--fpl_reduction", type=str, help="fpl_reduction", default= 'mean', required= False)
-parser.add_argument("--ial_reduction", type=str, help="ial_reduction", default= 'min', required= False)
-parser.add_argument("--wol_type", type=str, help="wol_type", default= 'nil', required= False)
-parser.add_argument("--fix_alpha", action="store_true", help="Set this flag to enable it")
-parser.add_argument("--use_pcgrad", action="store_true", help="Set this flag to enable it")
-parser.add_argument("--change_stepsize", action="store_true", help="Set this flag to enable it")
 parser.add_argument("--infeasibility_aversion_coeff", type=float, help="infeasibility_aversion_coeff", default= 0.5, required= False)
 parser.add_argument("--margin_threshold", type=float, help="margin_threshold", default= 2., required= False)
 # Comboptnet parameters
@@ -56,13 +49,7 @@ batch_size = argument_dict ['batch_size']
 max_epochs = argument_dict['max_epochs']
 lr = argument_dict['lr']
 fixed_cost = argument_dict['fixed_cost']
-wol_type = argument_dict['wol_type']
 infeasibility_aversion_coeff = argument_dict['infeasibility_aversion_coeff']
-fix_alpha = argument_dict['fix_alpha']
-fpl_reduction = argument_dict['fpl_reduction']
-ial_reduction = argument_dict['ial_reduction']
-use_pcgrad = argument_dict['use_pcgrad']
-change_stepsize = argument_dict['change_stepsize']
 margin_threshold = argument_dict['margin_threshold']
 # Comboptnet parameters
 loss = argument_dict['loss']
@@ -110,41 +97,13 @@ if argument_dict['model_name'] == 'odece':
         optsolver=solver, 
         num_predconstrsvar=1, 
         infeasibility_aversion_coeff = infeasibility_aversion_coeff,
-        fix_alpha = fix_alpha,
-        fpl_reduction = fpl_reduction,
-        ial_reduction = ial_reduction,
-        wol_type = wol_type,
-        use_pcgrad = use_pcgrad,
-        change_stepsize = change_stepsize,
         margin_threshold = margin_threshold,
         predict_cost=False, 
         lr=lr, 
         max_epochs=max_epochs,
         seed=seed
     )
-elif argument_dict['model_name'] == 'cachedodece':
-    logger = CSVLogger(
-        log_dir, 
-        name='cachedodece_deg{}_noise{}_numitems{}'.format(deg, noise_width, num_items)
-    )
-    model = ODECE_Caching(
-        [reg], 
-        predict_indices=1,
-        optsolver=solver, 
-        num_predconstrsvar=1, 
-        denormalize=False, 
-        predict_cost=False, 
-        wol_type = wol_type,
-        infeasibility_aversion_coeff = infeasibility_aversion_coeff,
-        fix_alpha = fix_alpha,
-        fpl_reduction = fpl_reduction,
-        ial_reduction = ial_reduction,
-        use_pcgrad = use_pcgrad,
-        change_stepsize = change_stepsize,
-        lr=lr, 
-        max_epochs=max_epochs,
-        seed=seed
-    )
+
 elif argument_dict['model_name'] == 'mse':
     logger = CSVLogger(
         log_dir, 
