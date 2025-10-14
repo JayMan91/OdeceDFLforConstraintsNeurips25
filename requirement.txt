@@ -1,0 +1,12 @@
+torch==2.6.0
+ipython==8.37.0
+pandas==2.2.3
+numpy==2.2.3
+networkx==3.4.2
+einops==0.8.1
+gurobipy==11.0.3
+scipy==1.15.2
+tqdm==4.67.1
+lightning==2.5.0
+jax==0.6.1
+scikit-learn==1.6.1
