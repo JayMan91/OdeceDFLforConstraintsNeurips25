@@ -8,7 +8,7 @@ This repository contains the implementation of **ODECE** (optimizing decisions t
 
 We demonstrate the effectiveness of ODECE across multiple optimization problems:
 - **Multidimensional Knapsack Problem (MDKP)**: Predicting item weights and knapsack capacities
-- **Brass Alloy Blending**: Predicting element quantities in alloy composition
+- **Brass Alloy Production**: Predicting amounts of metal in metal ore
 
 ## Citation
 
@@ -83,7 +83,7 @@ bash MDKP_CapaExp.sh
 The following models are implemented and compared in our experiments:
 
 - **ODECE** (Ours): `odece` - optimizing decisions through end-to-end constraint estimation
-- **Two-Stage Predict+Optimize**: `2sIntOpt` - Two-Stage Predict+Optimize for Mixed Integer Linear Programs with Unknown Parameters in Constraints. 
+- **Two-Stage Predict+Optimize**: `2sPtO` - Two-Stage Predict+Optimize for Mixed Integer Linear Programs with Unknown Parameters in Constraints. 
 - **CombOptNet**: `comboptnet` - Combinatorial optimization network
 - **Solver-free Learning**: `sfl` - Solver-Free Framework for Scalable Learning
 - **MSE Baseline**: `mse` - Mean squared error baseline
