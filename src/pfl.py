@@ -11,7 +11,7 @@ import json
 
 class PFL(pl.LightningModule):
     """
-    Predictive First Layer for optimization problems.
+    Prediction-Focused Learning (training by miniming prediction error of predicted parameters) 
     
     Args:   
         ml_predictor (list): List of nn.Module(s) to predict parameters. Models are mapped
@@ -342,7 +342,9 @@ class PFL(pl.LightningModule):
 
                     posthoc_regrets.append(corrected_regret + penalty_coeff * penalty_value)
                     recourse_costs.append(penalty_value)
+                    # Regret is not computed in this case (infeasible solution)
                     regrets.append(np.nan)
+                    
                     infeasible_regrets.append(regret)
                 else:
                     # If feasible, add the regular regret
@@ -360,6 +362,7 @@ class PFL(pl.LightningModule):
                 
                 # print ("Predicted Parameters", pred_params)
                 # print ("True Parameters", true_params)
+                # If an error occurs during optimization, mark all metrics as NaN and flag as unsolvable
                 infeasibilities.append(np.nan)
                 regrets.append(np.nan)
                 recourse_costs.append(np.nan)

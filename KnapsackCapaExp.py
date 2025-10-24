@@ -25,7 +25,7 @@ parser.add_argument("--num_feat", type= int, help="Number of Features", default=
 parser.add_argument("--dim", type=int, help="dimension of knapsack", default= 3, required= False)
 parser.add_argument("--deg", type=int, help="degree of misspecifaction", default= 4, required= False)
 parser.add_argument("--noise_width", type=float, help="noise width misspecifaction", default= 0.1, required= False)
-parser.add_argument("--fixed_cost", action="store_true", help="Set this flag to enable it")
+# parser.add_argument("--fixed_cost", action="store_true", help="Set this flag to enable it")
 
 parser.add_argument("--seed", type=int, help="random seed", default= 135, required= False)
 parser.add_argument("--batch_size", type=int, help="batch size", default= 32, required= False)
@@ -48,7 +48,7 @@ seed =  argument_dict['seed']
 batch_size = argument_dict ['batch_size']
 max_epochs = argument_dict['max_epochs']
 lr = argument_dict['lr']
-fixed_cost = argument_dict['fixed_cost']
+# fixed_cost = argument_dict['fixed_cost']
 infeasibility_aversion_coeff = argument_dict['infeasibility_aversion_coeff']
 margin_threshold = argument_dict['margin_threshold']
 # Comboptnet parameters
@@ -62,7 +62,7 @@ num_test_instances = 500
 
 
 X, w, costs, capacity = genCapacity(num_data = num_data + num_test_instances,num_features = num_feat, num_items = num_items, dim = dim, 
-deg = deg, noise_width = noise_width, fixed_cost = fixed_cost, seed = seed)
+deg = deg, noise_width = noise_width,  seed = seed)
 print ("Data Generated")
 print (capacity[0])
 
@@ -81,11 +81,7 @@ from ML.TorchML import LinearRegressionforKP_PredCapacity
 
 solver = knapsack_solver(num_items)
 reg = LinearRegressionforKP_PredCapacity ( num_feat, num_items, dim) # init model
-if fixed_cost:
-    log_dir = os.getcwd() + "/Results/KnapsackCapacity/FixedCosts/"
-else:
-    log_dir = os.getcwd() + "/Results/KnapsackCapacity/NoFixedCosts/"
-
+log_dir = os.getcwd() + "/Results/KnapsackCapacity/NoFixedCosts/"
 if argument_dict['model_name'] == 'odece':
     logger = CSVLogger(
         log_dir, 
@@ -161,10 +157,10 @@ elif argument_dict['model_name'] == 'comboptnet':
         max_epochs=max_epochs,
         seed=seed
     )
-elif argument_dict['model_name'] == 'TwoStageIntOpt':
+elif argument_dict['model_name'] == 'TwoStagePtO':
     logger = CSVLogger(
         log_dir, 
-        name= f'TwoStageIntOpt_penalty_{penaltyTerm}'
+        name= f'TwoStagePtO_penalty_{penaltyTerm}'
     )
     model = TwoStage(
         [reg],

@@ -13,30 +13,45 @@ class ODECE(PFL):
     """
     A PyTorch Lightning module for Optimizing Decision through End-to-End Constraint Estimation (ODECE).
 
-    Args:   
-        ml_predictor (list): List of nn.Module(s) to predict parameters. Models are mapped
-                            to predict_indices in order, e.g., if predict_indices=[2,0,5], then
-                            ml_predictor[0] predicts var[2], ml_predictor[1] predicts var[0], etc.
-
-                            Note: The order of optimizers will match the sorted predict_indices,
-                            not the order in ml_predictor. For example, if predict_indices=[2,0,5],
-                            then optimizer[0] is for variable 0, optimizer[1] for variable 2, etc.
-        optsolver (OptSolver): Optimization solver instance
-        num_predconstrsvar (int): Total number of variables in the constraints
-        predict_indices (list, optional): Indices of variables to predict. Must be within [0, num_predconstrsvar).
-                                        If None, predicts all variables up to num_predconstrsvar.
-                                        Will be sorted to ensure consistent ordering.
-        predict_cost (bool): Whether to predict the cost parameter. If True, last predictor in ml_predictor
-                           is used for cost prediction.
-        processes (int): Number of processors
-        dataset (Dataset): Training data if caching is used
-        
-        infeasibility_aversion_coeff (float): Coefficient for infeasibility aversion. Default is 0.5
-        
-        lr (float): Learning rate for optimizers
-        max_epochs (int): Maximum number of training epochs
-        scheduler: Learning rate scheduler
-        seed (int): Random seed
+    Args:
+        ml_predictor (list of nn.Module):
+            List of neural network modules to predict constraint (and optionally cost) parameters.
+            The mapping is determined by predict_indices: if predict_indices=[2,0,5], then
+            ml_predictor[0] predicts variable 2, ml_predictor[1] predicts variable 0, etc.
+            If predict_cost=True, the last module is used for cost prediction.
+        optsolver (OptSolver):
+            Instance of the optimization solver for solving the underlying problem.
+        num_predconstrsvar (int):
+            Total number of constraint variables to predict.
+        predict_indices (list of int, optional):
+            Indices of variables to predict (must be in [0, num_predconstrsvar)).
+            If None, predicts all variables up to num_predconstrsvar. Sorted for consistent ordering.
+        predict_cost (bool):
+            If True, also predicts the cost parameter (last predictor in ml_predictor).
+        processes (int):
+            Number of processors to use (for parallelism, if supported).
+        dataset (Dataset, optional):
+            Training data, used if caching or data access is required.
+        infeasibility_aversion_coeff (float, default=0.5):
+            Coefficient controlling the trade-off between infeasibility and optimality in the loss.
+        lr (float, default=1e-3):
+            Learning rate for optimizers.
+        max_epochs (int, default=100):
+            Maximum number of training epochs.
+        scheduler (optional):
+            Learning rate scheduler.
+        seed (int, default=135):
+            Random seed for reproducibility.
+        margin_threshold (float, default=2.0):
+            Margin threshold parameter Υ
+        denormalize (bool, default=False):
+            Whether to denormalize predicted parameters.
+        save_instance_wise_metrics (bool, default=True):
+            Whether to save metrics for each instance.
+    
+    Note:
+        - The order of optimizers matches the sorted predict_indices, not the order in ml_predictor.
+        - If predict_cost is True, the last element of ml_predictor is used for cost prediction.
     """
     def __init__(self, ml_predictor, optsolver, num_predconstrsvar,
         predict_indices=None, predict_cost=False, 
@@ -50,7 +65,7 @@ class ODECE(PFL):
 
         # self.dflloss = dfl_method
         self.margin_threshold = margin_threshold
-        self.prev_fpl_loss_value = 0.
+        self.prev_opl_loss_value = 0.
         
         self.num_warmup_epochs = 0
         
@@ -71,11 +86,11 @@ class ODECE(PFL):
             (1 - violation_true) * (nn.Softplus(beta=5)(loss_wrt_true + self.margin_threshold)) # Feasible Solutions, reduce excess capacity
         )
 
-        loss_withtruesol = (torch.mean (loss_withtruesol, dim =1)) # FPL mean
-        # print ("Check shape of FPL", loss_withtruesol.shape)  
-        # print ("Loss FPL", loss_withtruesol)
+        loss_withtruesol = (torch.mean (loss_withtruesol, dim =1)) # opl mean
+        # print ("Check shape of opl", loss_withtruesol.shape)  
+        # print ("Loss opl", loss_withtruesol)
 
-        self.log('loss_fpl', loss_withtruesol.mean(), prog_bar=False, on_epoch=True, on_step=False) 
+        self.log('loss_opl', loss_withtruesol.mean(), prog_bar=False, on_epoch=True, on_step=False) 
 
         # print ("Is infeasible: ", violation_pred)
         if mask.sum() == 0:
@@ -121,9 +136,6 @@ class ODECE(PFL):
         # loss_ial = dirac_GaussianApprox(  loss_wrt_pred )
         loss_ial = loss_ial.sum(dim=1) / (violation_pred.sum(dim=1).clamp(min=1)) # IAL
 
-        
-
-        
         optimalityviolation_pred = self.optsolver.check_optimality(costs [mask], objs [mask], 
             pred_sols, all_comparisons= False, normalize = False)
         indices = (optimalityviolation_pred >= 0).nonzero(as_tuple=True)[0]
@@ -213,24 +225,24 @@ class ODECE(PFL):
             pred_params_tuple, pred_costs = self._create_params_tuple(predicted_params,
                                                                     trueConstr_tuple, costs)
 
-            loss_ipl, loss_fpl = self.losses_computation( 
+            loss_ipl, loss_opl = self.losses_computation( 
                                                             trueConstr_tuple, 
                                                             pred_params_tuple, 
                                                             costs, sols, objs, 
                                                             predsol, mask)
 
-            self._update_grad(loss_ipl, loss_fpl, model, optimizer)
+            self._update_grad(loss_ipl, loss_opl, model, optimizer)
         for predictor in self.constr_predictors.values():
             predictor.eval()
         if self.predict_cost:
             self.cost_predictor.eval()
 
-    def _update_grad(self, loss_ipl, loss_fpl, model, optimizer):
-        prev_fpl_loss_value = loss_fpl.mean()
+    def _update_grad(self, loss_ipl, loss_opl, model, optimizer):
+        prev_opl_loss_value = loss_opl.mean()
         prev_ipl_loss_value = loss_ipl.mean()
         total_loss = (
             self.hparams.infeasibility_aversion_coeff *(prev_ipl_loss_value + 1e-4).mean()
-            + (1 - self.hparams.infeasibility_aversion_coeff) *(prev_fpl_loss_value + 1e-4).mean()
+            + (1 - self.hparams.infeasibility_aversion_coeff) *(prev_opl_loss_value + 1e-4).mean()
         )
         self.log ('train_loss', total_loss, prog_bar=False, on_epoch=True, on_step=False)
 

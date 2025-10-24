@@ -149,10 +149,10 @@ elif argument_dict['model_name'] == 'comboptnet':
         max_epochs=max_epochs,
         seed=seed
     )
-elif argument_dict['model_name'] == 'TwoStageIntOpt':
+elif argument_dict['model_name'] == 'TwoStagePtO':
     logger = CSVLogger(
         log_dir, 
-        name= f'TwoStageIntOpt_penalty_{penaltyTerm}'
+        name= f'TwoStagePtO_penalty_{penaltyTerm}'
     )
     model = TwoStage(
         [reg],

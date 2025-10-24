@@ -25,7 +25,7 @@ parser.add_argument("--num_feat", type= int, help="Number of Features", default=
 parser.add_argument("--dim", type=int, help="dimension of knapsack", default= 3, required= False)
 parser.add_argument("--deg", type=int, help="degree of misspecifaction", default= 4, required= False)
 parser.add_argument("--noise_width", type=float, help="noise width misspecifaction", default= 0.1, required= False)
-parser.add_argument("--fixed_cost", action="store_true", help="Set this flag to enable it")
+
 # parser.add_argument("--capacity_ratio", type=float, help="ratio of capacity", default= 0.5, required= False)
 parser.add_argument("--seed", type=int, help="random seed", default= 135, required= False)
 parser.add_argument("--batch_size", type=int, help="batch size", default= 32, required= False)
@@ -50,7 +50,6 @@ argument_dict = vars(args)
 num_items, num_data, num_feat, deg, noise_width, dim = argument_dict['num_items'], \
     argument_dict['num_data'], argument_dict['num_feat'], argument_dict['deg'], argument_dict['noise_width'], argument_dict['dim']
 seed =  argument_dict['seed']
-fixed_cost = argument_dict['fixed_cost']
 batch_size = argument_dict ['batch_size']
 max_epochs = argument_dict['max_epochs']
 lr = argument_dict['lr']
@@ -70,7 +69,7 @@ damping = argument_dict['damping']
 num_test_instances = 500
 capacity_ratio  = np.array ([0.18, 0.2, 0.22])
 X, w, costs, capacity = genWeights(num_data + num_test_instances, num_feat, num_items,
- capacity_ratio, dim, deg, noise_width, fixed_cost, seed)
+ capacity_ratio, dim, deg, noise_width, seed = seed)
 print ("Data Generated")
 print (capacity[0])
 print ("weights", w.max())
@@ -92,11 +91,7 @@ solver = knapsack_solver(num_items)
 reg = LinearRegressionforKP_PredWeight( num_feat, num_items, dim) # init model
 
 
-if fixed_cost:
-    log_dir = os.getcwd() + "/Results/KnapsackWeights/FixedCosts/"
-else:
-    log_dir = os.getcwd() + "/Results/KnapsackWeights/NoFixedCosts/"
-
+log_dir = os.getcwd() + "/Results/KnapsackWeights/NoFixedCosts/"
 if argument_dict['model_name'] == 'odece':
     logger = CSVLogger(
         log_dir, 
@@ -167,10 +162,10 @@ elif argument_dict['model_name'] == 'comboptnet':
         max_epochs=max_epochs,
         seed=seed
     )
-elif argument_dict['model_name'] == 'TwoStageIntOpt':
+elif argument_dict['model_name'] == 'TwoStagePtO':
     logger = CSVLogger(
         log_dir, 
-        name= 'TwoStageIntOpt_deg{}_noise{}_numitems{}'.format(deg, noise_width, num_items)
+        name= 'TwoStagePtO_deg{}_noise{}_numitems{}'.format(deg, noise_width, num_items)
     )
     model = TwoStage(
         [reg],
