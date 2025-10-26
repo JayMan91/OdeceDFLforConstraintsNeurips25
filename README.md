@@ -4,9 +4,8 @@ Code for the NeurIPS 2025 paper "Feasibility-Aware Decision-Focused Learning for
 
 ## Summary
 
-This repository contains the implementation of **ODECE** (optimizing decisions through end-to-end constraint estimation), a novel approach for Decision-Focused Learning (DFL) when predicting parameters that appear in the constraints of optimization problems.
-
-We demonstrate the effectiveness of ODECE across multiple optimization problems:
+This repository contains the implementation of **ODECE** (optimizing decisions through end-to-end constraint estimation), a novel Decision-Focused Learning (DFL) approach when uncertain parameters appear in the constraints of optimization problems that are predicted.
+We demonstrate ODECE across two optimization problems:
 - **Multidimensional Knapsack Problem (MDKP)**: Predicting item weights and knapsack capacities
 - **Brass Alloy Production**: Predicting amounts of metal in metal ore
 
@@ -28,7 +27,7 @@ If you use this code in your research, please cite our paper (will update after 
 
 ## Installation
 
-We recommend using a virtual environment to avoid conflicts with other Python packages:
+We recommend using a virtual environment:
 
 ```bash
 # Create a virtual environment
@@ -45,6 +44,11 @@ pip install -r requirement.txt
 ```
 
 ## Instructions for Running Experiments
+Make sure the scripts have executable permissions:
+
+```bash
+chmod +x run_all_exp.sh AlloyExp.sh MDKP_WeightExp.sh MDKP_CapaExp.sh
+```
 
 To run all experiments, execute the master script from the command line:
 
@@ -57,11 +61,6 @@ This will sequentially run:
 2. MDKP Weight prediction experiments (`MDKP_WeightExp.sh`)
 3. MDKP Capacity prediction experiments (`MDKP_CapaExp.sh`)
 
-Make sure the scripts have executable permissions:
-
-```bash
-chmod +x run_all_exp.sh AlloyExp.sh MDKP_WeightExp.sh MDKP_CapaExp.sh
-```
 
 ### Running Individual Experiments
 
