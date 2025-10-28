@@ -91,20 +91,19 @@ Each model can be configured with various hyperparameters (learning rate, temper
 
 ## Processing Results
 
-After running experiments, process the results using:
+After running experiments, process the results using `process_results.sh` script.
+Make sure the script has executable permissions:
 
 ```bash
-# For Alloy experiments
-python3 read_result.py --result-dir Results/Alloy/
-
-# For MDKP Weight experiments
-python3 read_result.py --result-dir Results/KnapsackWeights/NoFixedCosts/
-
-# For MDKP Capacity experiments
-python3 read_result.py --result-dir Results/KnapsackCapacity/NoFixedCosts/
+chmod +x process_results.sh
 ```
 
-This will generate CSV files in the `CombinedResults/` directory containing aggregated metrics across all runs.
+Run the script:
+```bash
+bash process_results.sh
+```
+
+This script will automatically process all experiment results and generate CSV files in the `CombinedResults/` directory containing aggregated metrics across all runs.
 
 ## Visualization
 
