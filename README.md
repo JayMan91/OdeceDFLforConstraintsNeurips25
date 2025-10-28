@@ -110,7 +110,8 @@ This script will automatically process all experiment results and generate CSV f
 Generate scatter plots comparing model performance:
 
 ```bash
-python3 visualization/MakeScatterPlot.py
+cd visualization
+python3 MakeScatterPlot.py
 ```
 
 This will create the scatter plot reported in the paper.
