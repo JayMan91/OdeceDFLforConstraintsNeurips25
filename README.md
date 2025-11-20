@@ -14,14 +14,13 @@ We demonstrate ODECE across two optimization problems:
 If you use this code in your research, please cite our paper (will update after the proceedings are publicly available):
 
 ```bibtex
-@misc{mandi2025feasibilityawaredecisionfocusedlearningpredicting,
-      title={Feasibility-Aware Decision-Focused Learning for Predicting Parameters in the Constraints}, 
-      author={Jayanta Mandi and Marianne Defresne and Senne Berden and Tias Guns},
-      year={2025},
-      eprint={2510.04951},
-      archivePrefix={arXiv},
-      primaryClass={cs.LG},
-      url={https://arxiv.org/abs/2510.04951}, 
+@inproceedings{
+mandi2025feasibilityaware,
+title={Feasibility-Aware Decision-Focused Learning for Predicting Parameters in the Constraints},
+author={Jayanta Mandi and Marianne Defresne and Senne Berden and Tias Guns},
+booktitle={The Thirty-ninth Annual Conference on Neural Information Processing Systems},
+year={2025},
+url={https://openreview.net/forum?id=eTmvwxohRx}
 }
 ```
 
