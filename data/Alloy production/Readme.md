@@ -4,7 +4,7 @@ This dataset is adapted from the [GitHub repository](https://github.com/Elizabet
 
 ## Instructions for Use
 
-1. Download the dataset ZIP file.
+1. Download the dataset ZIP file, named `brass.zip`.
 2. Copy the ZIP file here.
 3. Unzip the file in that directory.
 
